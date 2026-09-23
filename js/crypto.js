@@ -1,20 +1,38 @@
 /**
  * crypto.js — Client-side AES-256-GCM encryption module
  * Uses the native Web Crypto API (window.crypto.subtle).
- * The Master Key never leaves the browser.
- *
- * Flow:
- *   masterPassword + salt → PBKDF2 → AES-GCM-256 key
- *   plaintext JSON         → encrypt → base64 ciphertext + IV
- *   base64 ciphertext + IV → decrypt → plaintext JSON
  */
 
 const Crypto = (() => {
     /**
+     * Helper to safely convert Uint8Array to base64 without hitting JS call stack limits.
+     * Prevents "Maximum call stack size exceeded" on large data payloads.
+     */
+    function bytesToBase64(bytes) {
+        let binString = "";
+        const len = bytes.byteLength;
+        for (let i = 0; i < len; i++) {
+            binString += String.fromCharCode(bytes[i]);
+        }
+        return btoa(binString);
+    }
+
+    /**
+     * Helper to convert base64 string to Uint8Array safely.
+     */
+    function base64ToBytes(b64) {
+        const binString = atob(b64);
+        const len = binString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+            bytes[i] = binString.charCodeAt(i);
+        }
+        return bytes;
+    }
+
+    /**
      * Derive an AES-GCM-256 key from a master password using PBKDF2.
-     * @param {string} masterPassword
-     * @param {Uint8Array} saltBytes
-     * @returns {Promise<CryptoKey>}
+     * Updated iteration count to 600,000 (OWASP Recommendation).
      */
     async function deriveKey(masterPassword, saltBytes) {
         const enc = new TextEncoder();
@@ -29,7 +47,7 @@ const Crypto = (() => {
             {
                 name: "PBKDF2",
                 salt: saltBytes,
-                iterations: 100000,
+                iterations: 600000, // OWASP recommendation for PBKDF2-HMAC-SHA256
                 hash: "SHA-256"
             },
             keyMaterial,
@@ -41,9 +59,6 @@ const Crypto = (() => {
 
     /**
      * Encrypt a JavaScript object using AES-GCM-256.
-     * @param {object} dataObj  - The plaintext object to encrypt
-     * @param {CryptoKey} cryptoKey
-     * @returns {Promise<{ciphertext: string, iv: string}>} base64 encoded strings
      */
     async function encrypt(dataObj, cryptoKey) {
         const enc = new TextEncoder();
@@ -54,23 +69,21 @@ const Crypto = (() => {
             cryptoKey,
             encoded
         );
+
         return {
-            ciphertext: btoa(String.fromCharCode(...new Uint8Array(encryptedBuffer))),
-            iv: btoa(String.fromCharCode(...iv))
+            ciphertext: bytesToBase64(new Uint8Array(encryptedBuffer)),
+            iv: bytesToBase64(iv)
         };
     }
 
     /**
      * Decrypt a base64 ciphertext + IV back into a JavaScript object.
-     * @param {string} ciphertextB64
-     * @param {string} ivB64
-     * @param {CryptoKey} cryptoKey
-     * @returns {Promise<object>}
      */
     async function decrypt(ciphertextB64, ivB64, cryptoKey) {
         const dec = new TextDecoder();
-        const ciphertext = Uint8Array.from(atob(ciphertextB64), c => c.charCodeAt(0));
-        const iv = Uint8Array.from(atob(ivB64), c => c.charCodeAt(0));
+        const ciphertext = base64ToBytes(ciphertextB64);
+        const iv = base64ToBytes(ivB64);
+
         const decryptedBuffer = await crypto.subtle.decrypt(
             { name: "AES-GCM", iv },
             cryptoKey,
@@ -81,35 +94,19 @@ const Crypto = (() => {
 
     /**
      * Generate a random 16-byte salt.
-     * @returns {Uint8Array}
      */
     function generateSalt() {
         return crypto.getRandomValues(new Uint8Array(16));
     }
 
-    /**
-     * Convert a Uint8Array salt to base64 string for storage.
-     * @param {Uint8Array} saltBytes
-     * @returns {string}
-     */
     function saltToBase64(saltBytes) {
-        return btoa(String.fromCharCode(...saltBytes));
+        return bytesToBase64(saltBytes);
     }
 
-    /**
-     * Convert a base64 salt string back to Uint8Array.
-     * @param {string} saltB64
-     * @returns {Uint8Array}
-     */
     function saltFromBase64(saltB64) {
-        return Uint8Array.from(atob(saltB64), c => c.charCodeAt(0));
+        return base64ToBytes(saltB64);
     }
 
-    /**
-     * Calculate password strength score (0 to 100) and label.
-     * @param {string} pwd
-     * @returns {{score: number, label: string, color: string, width: string}}
-     */
     function calculateStrength(pwd) {
         if (!pwd) return { score: 0, label: 'None', color: 'bg-slate-300 dark:bg-slate-700', width: 'w-0' };
         let score = 0;
@@ -132,10 +129,6 @@ const Crypto = (() => {
         }
     }
 
-    /**
-     * Generate a secure 12-word random passphrase.
-     * @returns {string}
-     */
     function generatePassphrase() {
         const wordList = [
             "alpha", "anchor", "beacon", "bridge", "cannon", "castle", "cipher", "cobalt",
