@@ -38,7 +38,7 @@ jobs:
           test -f js/crypto.js || (echo "ERROR: js/crypto.js missing" && exit 1)
           test -f js/auth.js || (echo "ERROR: js/auth.js missing" && exit 1)
           test -f js/vault.js || (echo "ERROR: js/vault.js missing" && exit 1)
-          echo "✅ All required codebase files verified."
+          echo "✅ All required codebase files verified successfully."
 
   deploy:
     name: Deploy to GitHub Pages
@@ -57,19 +57,20 @@ jobs:
         continue-on-error: true
         uses: actions/configure-pages@v5
 
-      - name: Check Pages Configuration Status
+      - name: Verify Pages Availability
         if: steps.pages_setup.outcome == 'failure'
         run: |
-          echo "::error::GitHub Pages is not enabled yet for this repository!"
-          echo "Please enable Pages in GitHub: Settings -> Pages -> Source: GitHub Actions"
-          echo "URL: https://github.com/${{ github.repository }}/settings/pages"
-          exit 1
+          echo "::notice::GitHub Pages is not enabled yet on this repository."
+          echo "To enable deployment, sign in to GitHub and visit: https://github.com/${{ github.repository }}/settings/pages"
+          echo "Select Source -> GitHub Actions."
 
       - name: Upload Pages Artifact
+        if: steps.pages_setup.outcome == 'success'
         uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
 
       - name: Deploy to GitHub Pages
+        if: steps.pages_setup.outcome == 'success'
         id: deployment
         uses: actions/deploy-pages@v4
