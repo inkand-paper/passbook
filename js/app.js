@@ -53,11 +53,43 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
+    // ─── Master Key Real-time Strength Meter & Generator ─────────────────
+    const masterKeyInput = document.getElementById('masterKeyInput');
+    const strengthBar = document.getElementById('masterKeyStrengthBar');
+    const strengthText = document.getElementById('masterKeyStrengthText');
+
+    function updateStrength() {
+        if (!masterKeyInput || !strengthBar || !strengthText) return;
+        const res = Crypto.calculateStrength(masterKeyInput.value);
+        strengthBar.className = `h-full transition-all duration-300 ${res.color} ${res.width}`;
+        strengthText.innerText = res.label;
+        strengthText.className = `font-bold ${res.score < 40 ? 'text-red-500' : res.score < 65 ? 'text-amber-500' : 'text-emerald-500'}`;
+    }
+
+    masterKeyInput?.addEventListener('input', updateStrength);
+
+    document.getElementById('generatePassphraseBtn')?.addEventListener('click', () => {
+        const phrase = Crypto.generatePassphrase();
+        masterKeyInput.value = phrase;
+        masterKeyInput.type = 'text'; // Reveal generated phrase for easy copying
+        const icon = document.getElementById('masterKeyIcon');
+        if (icon) icon.setAttribute('data-lucide', 'eye-off');
+        if (window.lucide) lucide.createIcons();
+        updateStrength();
+        UI.showToast('12-Word Passphrase generated!');
+    });
+
     // ─── Master Key / Unlock Form ────────────────────────────────────────
     document.getElementById('masterKeyForm').addEventListener('submit', async (e) => {
         e.preventDefault();
-        const masterPassword = document.getElementById('masterKeyInput').value;
+        const masterPassword = masterKeyInput.value;
         UI.setUnlockMessage('');
+
+        if (masterPassword.length < 8) {
+            UI.setUnlockMessage('Master Key must be at least 8 characters long for zero-knowledge security.');
+            return;
+        }
+
         const btn = document.getElementById('unlockBtn');
         btn.disabled = true;
         btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Unlocking...</span>';

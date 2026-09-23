@@ -56,7 +56,7 @@ const UI = (() => {
         }
     }
 
-    // ─── Password Masking ─────────────────────────────────────────────────
+    // ─── Password Masking & Input Visibility ──────────────────────────────
 
     function togglePassword(id) {
         if (AppState.visiblePasswords.has(id)) {
@@ -65,6 +65,26 @@ const UI = (() => {
             AppState.visiblePasswords.add(id);
         }
         Render.table();
+    }
+
+    /**
+     * Toggle password input visibility for any input field by ID.
+     * @param {string} inputId
+     * @param {string} iconId
+     */
+    function toggleFieldVisibility(inputId, iconId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+        if (!input) return;
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            if (icon) icon.setAttribute('data-lucide', 'eye-off');
+        } else {
+            input.type = 'password';
+            if (icon) icon.setAttribute('data-lucide', 'eye');
+        }
+        if (window.lucide) lucide.createIcons();
     }
 
     // ─── Expand / Collapse Rows ───────────────────────────────────────────
@@ -173,7 +193,7 @@ const UI = (() => {
     return {
         showAuth, showMasterKey, showDashboard,
         switchAuthTab,
-        togglePassword, toggleExpand, expandAll, collapseAll,
+        togglePassword, toggleFieldVisibility, toggleExpand, expandAll, collapseAll,
         handleSearch, copyToClipboard,
         toggleDarkMode, applyStoredTheme,
         showToast, setAuthMessage, setUnlockMessage,

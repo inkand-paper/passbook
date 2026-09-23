@@ -105,5 +105,50 @@ const Crypto = (() => {
         return Uint8Array.from(atob(saltB64), c => c.charCodeAt(0));
     }
 
-    return { deriveKey, encrypt, decrypt, generateSalt, saltToBase64, saltFromBase64 };
+    /**
+     * Calculate password strength score (0 to 100) and label.
+     * @param {string} pwd
+     * @returns {{score: number, label: string, color: string, width: string}}
+     */
+    function calculateStrength(pwd) {
+        if (!pwd) return { score: 0, label: 'None', color: 'bg-slate-300 dark:bg-slate-700', width: 'w-0' };
+        let score = 0;
+        if (pwd.length >= 8) score += 25;
+        if (pwd.length >= 12) score += 15;
+        if (pwd.length >= 16) score += 10;
+        if (/[a-z]/.test(pwd)) score += 10;
+        if (/[A-Z]/.test(pwd)) score += 15;
+        if (/[0-9]/.test(pwd)) score += 10;
+        if (/[^a-zA-Z0-9]/.test(pwd)) score += 15;
+
+        if (score < 40) {
+            return { score, label: 'Weak (Min 8 chars required)', color: 'bg-red-500', width: 'w-1/4' };
+        } else if (score < 65) {
+            return { score, label: 'Fair', color: 'bg-amber-500', width: 'w-2/4' };
+        } else if (score < 85) {
+            return { score, label: 'Strong', color: 'bg-emerald-500', width: 'w-3/4' };
+        } else {
+            return { score, label: 'Enterprise Grade 🛡️', color: 'bg-blue-600', width: 'w-full' };
+        }
+    }
+
+    /**
+     * Generate a secure 12-word random passphrase.
+     * @returns {string}
+     */
+    function generatePassphrase() {
+        const wordList = [
+            "alpha", "anchor", "beacon", "bridge", "cannon", "castle", "cipher", "cobalt",
+            "cosmic", "crystal", "dragon", "eagle", "emerald", "falcon", "forest", "galaxy",
+            "granite", "harbor", "horizon", "island", "jaguar", "jungle", "knight", "legend",
+            "matrix", "monarch", "nebula", "neutron", "ocean", "orbit", "panther", "phoenix",
+            "planet", "prism", "pyramid", "quantum", "radar", "shadow", "shield", "silver",
+            "solar", "spectrum", "sphere", "summit", "thunder", "titan", "vector", "vortex"
+        ];
+        const randomValues = new Uint32Array(12);
+        crypto.getRandomValues(randomValues);
+        return Array.from(randomValues).map(val => wordList[val % wordList.length]).join('-');
+    }
+
+    return { deriveKey, encrypt, decrypt, generateSalt, saltToBase64, saltFromBase64, calculateStrength, generatePassphrase };
 })();
