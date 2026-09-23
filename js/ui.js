@@ -18,9 +18,36 @@ const UI = (() => {
         showView('authView');
     }
 
-    function showMasterKey() {
+    function showMasterKey(isSetupMode = false) {
         const emailEl = document.getElementById('userBadgeEmail');
         if (emailEl && AppState.currentUser) emailEl.innerText = AppState.currentUser.email;
+
+        const titleEl = document.getElementById('masterKeyTitle');
+        const descEl = document.getElementById('masterKeyDesc');
+        const setupControls = document.getElementById('setupKeyControls');
+        const forgotLink = document.getElementById('forgotKeyLink');
+        const submitText = document.getElementById('unlockSubmitText');
+
+        if (isSetupMode) {
+            if (titleEl) titleEl.innerText = 'Create Vault Master Key';
+            if (descEl) descEl.innerHTML = 'Create a strong Master Key to encrypt your new vault.<br><span class="text-emerald-600 dark:text-emerald-400 font-semibold">Min 8 characters. Never leaves your device.</span>';
+            if (setupControls) setupControls.classList.remove('hidden');
+            if (forgotLink) forgotLink.classList.add('hidden');
+            if (submitText) submitText.innerText = 'Create Vault & Continue';
+        } else {
+            if (titleEl) titleEl.innerText = 'Enter Master Key';
+            if (descEl) descEl.innerHTML = 'Enter your Master Key to decrypt your vault in-browser.<br><span class="text-amber-600 dark:text-amber-400 font-semibold">It never leaves your device.</span>';
+            if (setupControls) setupControls.classList.add('hidden');
+            if (forgotLink) forgotLink.classList.remove('hidden');
+            if (submitText) submitText.innerText = 'Unlock Vault';
+        }
+
+        const input = document.getElementById('masterKeyInput');
+        if (input) input.value = '';
+        const confirmInput = document.getElementById('masterKeyConfirmInput');
+        if (confirmInput) confirmInput.value = '';
+        setUnlockMessage('');
+
         showView('masterKeyView');
     }
 

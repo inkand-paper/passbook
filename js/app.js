@@ -20,7 +20,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     // 3. Restore existing session (e.g. page refresh)
     const existingUser = await Auth.restoreSession();
     if (existingUser) {
-        UI.showMasterKey();
+        const hasVault = await Vault.hasVault();
+        UI.showMasterKey(!hasVault);
     } else {
         UI.showAuth();
     }
@@ -34,11 +35,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         try {
             if (AppState.authMode === 'signin') {
                 await Auth.signIn(email, password);
-                UI.showMasterKey();
+                const hasVault = await Vault.hasVault();
+                UI.showMasterKey(!hasVault);
             } else {
                 const { sessionActive } = await Auth.signUp(email, password);
                 if (sessionActive) {
-                    UI.showMasterKey();
+                    UI.showMasterKey(true); // Always Setup Mode for brand new signup!
                     UI.showToast('Account created! Set your Master Key to continue.');
                 } else {
                     UI.setAuthMessage(
@@ -72,17 +74,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         const phrase = Crypto.generatePassphrase();
         masterKeyInput.value = phrase;
         masterKeyInput.type = 'text'; // Reveal generated phrase for easy copying
+        const confirmInput = document.getElementById('masterKeyConfirmInput');
+        if (confirmInput) {
+            confirmInput.value = phrase;
+            confirmInput.type = 'text';
+        }
         const icon = document.getElementById('masterKeyIcon');
         if (icon) icon.setAttribute('data-lucide', 'eye-off');
+        const confirmIcon = document.getElementById('masterKeyConfirmIcon');
+        if (confirmIcon) confirmIcon.setAttribute('data-lucide', 'eye-off');
         if (window.lucide) lucide.createIcons();
         updateStrength();
-        UI.showToast('12-Word Passphrase generated!');
+        UI.showToast('12-Word Passphrase generated & copied to confirm field!');
     });
 
     // ─── Master Key / Unlock Form ────────────────────────────────────────
     document.getElementById('masterKeyForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         const masterPassword = masterKeyInput.value;
+        const confirmInput = document.getElementById('masterKeyConfirmInput');
+        const setupControls = document.getElementById('setupKeyControls');
+        const isSetupMode = setupControls && !setupControls.classList.contains('hidden');
+
         UI.setUnlockMessage('');
 
         if (masterPassword.length < 8) {
@@ -90,20 +103,27 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
+        if (isSetupMode && confirmInput) {
+            if (masterPassword !== confirmInput.value) {
+                UI.setUnlockMessage('Master Keys do not match. Please re-enter to confirm.');
+                return;
+            }
+        }
+
         const btn = document.getElementById('unlockBtn');
         btn.disabled = true;
-        btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Unlocking...</span>';
+        btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Processing...</span>';
         if (window.lucide) lucide.createIcons();
 
         try {
             await Vault.unlock(masterPassword);
             UI.showDashboard();
-            UI.showToast('Vault unlocked!');
+            UI.showToast(isSetupMode ? 'Vault created and encrypted!' : 'Vault unlocked!');
         } catch (err) {
             UI.setUnlockMessage(err.message || 'Could not unlock vault.');
         } finally {
             btn.disabled = false;
-            btn.innerHTML = '<i data-lucide="unlock" class="w-4 h-4"></i><span>Unlock Vault</span>';
+            btn.innerHTML = `<i data-lucide="unlock" class="w-4 h-4"></i><span id="unlockSubmitText">${isSetupMode ? 'Create Vault & Continue' : 'Unlock Vault'}</span>`;
             if (window.lucide) lucide.createIcons();
         }
     });

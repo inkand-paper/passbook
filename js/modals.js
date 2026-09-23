@@ -141,8 +141,53 @@ const Modals = (() => {
         await Vault.save();
     }
 
+    // ─── Reset Vault Modal ────────────────────────────────────────────────
+    function openResetVault() {
+        document.getElementById('resetVaultModal')?.classList.remove('hidden');
+        if (window.lucide) lucide.createIcons();
+    }
+
+    function closeResetVault() {
+        document.getElementById('resetVaultModal')?.classList.add('hidden');
+    }
+
+    function triggerImportBackup() {
+        const fileInput = document.getElementById('backupFileInput');
+        if (!fileInput) return;
+        fileInput.onchange = async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            try {
+                const text = await file.text();
+                const importedData = JSON.parse(text);
+                if (!Array.isArray(importedData)) throw new Error('Invalid backup file format.');
+                
+                closeResetVault();
+                AppState.passbookData = importedData;
+                UI.showMasterKey(true);
+                UI.showToast('Backup file read successfully! Create your new Master Key to encrypt.');
+            } catch (err) {
+                alert('Failed to read backup file: ' + err.message);
+            }
+        };
+        fileInput.click();
+    }
+
+    async function confirmWipeVault() {
+        if (!confirm('Are you sure you want to wipe your vault? All encrypted data in Supabase will be erased.')) return;
+        try {
+            await Vault.resetVault();
+            closeResetVault();
+            UI.showMasterKey(true);
+            UI.showToast('Vault wiped. Create your new Master Key to start fresh!');
+        } catch (err) {
+            alert('Wipe failed: ' + err.message);
+        }
+    }
+
     return {
         openAddPrimary, openEditPrimary, closePrimary, submitPrimary, deletePrimary,
-        openAddSub, openEditSub, closeSub, submitSub, deleteSub
+        openAddSub, openEditSub, closeSub, submitSub, deleteSub,
+        openResetVault, closeResetVault, triggerImportBackup, confirmWipeVault
     };
 })();

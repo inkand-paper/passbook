@@ -145,5 +145,34 @@ const Vault = (() => {
         if (window.lucide) lucide.createIcons();
     }
 
-    return { unlock, save, lock, defaultVaultData };
+    /**
+     * Check if a vault record exists for the current user in Supabase.
+     * @returns {Promise<boolean>}
+     */
+    async function hasVault() {
+        if (!AppState.currentUser) return false;
+        try {
+            const db = AppState.supabase;
+            const { data: rows } = await db
+                .from(TABLE)
+                .select('id')
+                .eq('user_id', AppState.currentUser.id)
+                .limit(1);
+            return !!(rows && rows.length > 0);
+        } catch (_) {
+            return false;
+        }
+    }
+
+    /**
+     * Reset/Delete the user's encrypted vault record from Supabase.
+     */
+    async function resetVault() {
+        if (!AppState.currentUser) return;
+        const db = AppState.supabase;
+        await db.from(TABLE).delete().eq('user_id', AppState.currentUser.id);
+        lock();
+    }
+
+    return { unlock, save, lock, hasVault, resetVault, defaultVaultData };
 })();

@@ -74,7 +74,7 @@
     </div>
 
     <!-- ═══════════════════════════════════════════════════
-         VIEW 2 — MASTER KEY LOCK SCREEN
+         VIEW 2 — MASTER KEY LOCK / SETUP SCREEN
          ═══════════════════════════════════════════════════ -->
     <div id="masterKeyView" class="min-h-screen flex items-center justify-center p-4 hidden">
         <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-md p-6 sm:p-8 space-y-6 text-center">
@@ -84,10 +84,10 @@
             </div>
 
             <div>
-                <h2 class="text-xl font-bold text-slate-900 dark:text-white">Enter Master Key</h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                <h2 id="masterKeyTitle" class="text-xl font-bold text-slate-900 dark:text-white">Enter Master Key</h2>
+                <p id="masterKeyDesc" class="text-xs text-slate-500 dark:text-slate-400 mt-1">
                     Your Master Key derives the AES-256 key to decrypt your vault in-browser.<br>
-                    <span class="text-amber-600 dark:text-amber-400 font-semibold">Min 8 characters required. Never leaves your device.</span>
+                    <span class="text-amber-600 dark:text-amber-400 font-semibold">It never leaves your device.</span>
                 </p>
             </div>
 
@@ -102,30 +102,49 @@
                     </div>
 
                     <div class="relative">
-                        <input type="password" id="masterKeyInput" required autocomplete="off" placeholder="Enter or generate Master Key..."
+                        <input type="password" id="masterKeyInput" required autocomplete="off" placeholder="Enter Master Key..."
                             class="w-full px-3.5 py-2.5 pr-10 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white mono-font focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                         <button type="button" onclick="UI.toggleFieldVisibility('masterKeyInput', 'masterKeyIcon')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer p-1">
                             <i data-lucide="eye" id="masterKeyIcon" class="w-4 h-4"></i>
                         </button>
                     </div>
 
-                    <!-- Password Strength Meter -->
-                    <div class="mt-2 space-y-1">
-                        <div class="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                            <div id="masterKeyStrengthBar" class="h-full bg-slate-300 dark:bg-slate-700 w-0 transition-all duration-300"></div>
+                    <!-- Setup Mode Controls (Strength Meter & Confirm Key) -->
+                    <div id="setupKeyControls" class="space-y-3 mt-2 hidden">
+                        <!-- Password Strength Meter -->
+                        <div class="space-y-1">
+                            <div class="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
+                                <div id="masterKeyStrengthBar" class="h-full bg-slate-300 dark:bg-slate-700 w-0 transition-all duration-300"></div>
+                            </div>
+                            <div class="flex items-center justify-between text-[11px]">
+                                <span class="text-slate-400 font-medium">Strength:</span>
+                                <span id="masterKeyStrengthText" class="font-bold text-slate-400">Min 8 chars</span>
+                            </div>
                         </div>
-                        <div class="flex items-center justify-between text-[11px]">
-                            <span class="text-slate-400 font-medium">Strength:</span>
-                            <span id="masterKeyStrengthText" class="font-bold text-slate-400">Min 8 chars</span>
+
+                        <div>
+                            <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Confirm Master Key</label>
+                            <div class="relative">
+                                <input type="password" id="masterKeyConfirmInput" autocomplete="off" placeholder="Re-enter Master Key to confirm..."
+                                    class="w-full px-3.5 py-2.5 pr-10 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white mono-font focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                                <button type="button" onclick="UI.toggleFieldVisibility('masterKeyConfirmInput', 'masterKeyConfirmIcon')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer p-1">
+                                    <i data-lucide="eye" id="masterKeyConfirmIcon" class="w-4 h-4"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <button type="submit" id="unlockBtn" class="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-lg shadow-md transition-all flex items-center justify-center space-x-2">
                     <i data-lucide="unlock" class="w-4 h-4"></i>
-                    <span>Unlock / Initialize Vault</span>
+                    <span id="unlockSubmitText">Unlock Vault</span>
                 </button>
             </form>
+
+            <div class="flex items-center justify-between text-xs pt-1">
+                <button type="button" id="forgotKeyLink" onclick="Modals.openResetVault()" class="text-amber-600 dark:text-amber-400 hover:underline font-semibold cursor-pointer hidden">Forgot Master Key?</button>
+                <div class="grow"></div>
+            </div>
 
             <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs">
                 <span id="userBadgeEmail" class="text-slate-500 truncate max-w-[220px]"></span>
@@ -323,6 +342,46 @@
                     <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow">Save Item</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         MODAL — RESET VAULT / FORGOT MASTER KEY
+         ═══════════════════════════════════════════════════ -->
+    <div id="resetVaultModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-md overflow-hidden">
+            <div class="p-4 bg-amber-600 text-white flex items-center justify-between">
+                <h3 class="font-bold text-base flex items-center space-x-2">
+                    <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-200"></i>
+                    <span>Reset Vault</span>
+                </h3>
+                <button type="button" onclick="Modals.closeResetVault()" class="text-amber-100 hover:text-white cursor-pointer">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-5 space-y-4">
+                <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                    Due to <b class="text-slate-900 dark:text-white">Zero-Knowledge encryption</b>, lost Master Keys cannot be recovered by server admins.
+                </p>
+                <div class="bg-amber-50 dark:bg-amber-950/40 p-3 rounded-lg border border-amber-200 dark:border-amber-800 text-xs text-amber-800 dark:text-amber-300">
+                    If you have a downloaded <b>backup JSON file</b>, you can restore your data with a new Master Key. Otherwise, wiping will erase the unreadable vault payload so you can start fresh.
+                </div>
+                <div class="space-y-2 pt-2">
+                    <button type="button" onclick="Modals.triggerImportBackup()" class="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-lg shadow transition-all flex items-center justify-center space-x-2 cursor-pointer">
+                        <i data-lucide="upload" class="w-4 h-4"></i>
+                        <span>Restore from Backup JSON File</span>
+                    </button>
+                    <input type="file" id="backupFileInput" accept=".json" class="hidden">
+
+                    <button type="button" onclick="Modals.confirmWipeVault()" class="w-full py-2.5 px-4 bg-red-600 hover:bg-red-700 text-white font-semibold text-xs rounded-lg shadow transition-all flex items-center justify-center space-x-2 cursor-pointer">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        <span>Wipe Vault & Start Fresh</span>
+                    </button>
+                </div>
+                <div class="pt-2 text-right">
+                    <button type="button" onclick="Modals.closeResetVault()" class="text-xs font-semibold text-slate-500 hover:underline">Cancel</button>
+                </div>
+            </div>
         </div>
     </div>
 
