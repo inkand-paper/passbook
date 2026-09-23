@@ -1,0 +1,53 @@
+/* ============================================================
+   styles.css — Sigma PassBook custom styles
+   All Tailwind utility CSS is loaded via CDN in index.html.
+   This file contains only custom non-utility styles.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+/* ─── Base Typography ──────────────────────────────────────── */
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+.mono-font {
+    font-family: 'JetBrains Mono', monospace;
+}
+
+/* ─── Spreadsheet Grid Lines ───────────────────────────────── */
+.sheet-table > thead > tr > th,
+.sheet-table > tbody > tr > td {
+    border-right: 1px solid #cbd5e1;
+    border-bottom: 1px solid #cbd5e1;
+}
+
+.dark .sheet-table > thead > tr > th,
+.dark .sheet-table > tbody > tr > td {
+    border-right: 1px solid #334155;
+    border-bottom: 1px solid #334155;
+}
+
+.sheet-table th:last-child,
+.sheet-table td:last-child {
+    border-right: none;
+}
+
+/* ─── Accordion Chevron ────────────────────────────────────── */
+.arrow-rotate {
+    transition: transform 0.2s ease;
+}
+
+.expanded .arrow-rotate {
+    transform: rotate(180deg);
+}
+
+/* ─── Spin animation for sync badge ───────────────────────── */
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+.animate-spin {
+    animation: spin 1s linear infinite;
+}

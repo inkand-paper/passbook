@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Sigma PassBook — Enterprise Zero-Knowledge encrypted password manager. AES-256-GCM client-side encryption with Supabase cloud sync.">
+    <title>Sigma PassBook | Enterprise Vault</title>
+
+    <!-- Tailwind CSS (utility engine) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: {} }
+        }
+    </script>
+
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="css/styles.css">
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Supabase JS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200">
+
+    <!-- ═══════════════════════════════════════════════════
+         VIEW 1 — AUTHENTICATION
+         ═══════════════════════════════════════════════════ -->
+    <div id="authView" class="min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-md p-6 sm:p-8 space-y-6">
+
+            <!-- Brand -->
+            <div class="text-center space-y-2">
+                <div class="inline-flex p-3 bg-blue-600 text-white rounded-xl shadow-lg mb-2">
+                    <i data-lucide="shield-check" class="w-8 h-8"></i>
+                </div>
+                <h1 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Sigma PassBook</h1>
+                <p class="text-xs text-slate-500 dark:text-slate-400">Enterprise Zero-Knowledge Encrypted Vault</p>
+            </div>
+
+            <!-- Auth Tabs -->
+            <div class="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl text-xs font-semibold">
+                <button type="button" id="tabSignInBtn" class="flex-1 py-2.5 rounded-lg bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm font-bold cursor-pointer transition-all">Sign In</button>
+                <button type="button" id="tabSignUpBtn" class="flex-1 py-2.5 rounded-lg text-slate-500 dark:text-slate-400 font-medium cursor-pointer transition-all">Create Account</button>
+            </div>
+
+            <!-- Auth Form -->
+            <form id="authForm" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Email Address</label>
+                    <input type="email" id="authEmail" required autocomplete="email" placeholder="user@company.com"
+                        class="w-full px-3.5 py-2.5 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Account Password</label>
+                    <input type="password" id="authPassword" required autocomplete="current-password" placeholder="••••••••••••"
+                        class="w-full px-3.5 py-2.5 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <button type="submit" id="authSubmitBtn" class="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-lg shadow-md transition-all flex items-center justify-center">
+                    <span id="authSubmitText">Sign In to Vault</span>
+                </button>
+            </form>
+
+            <div id="authMessage" class="text-xs text-center font-medium min-h-[1rem]"></div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         VIEW 2 — MASTER KEY LOCK SCREEN
+         ═══════════════════════════════════════════════════ -->
+    <div id="masterKeyView" class="min-h-screen flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-md p-6 sm:p-8 space-y-6 text-center">
+
+            <div class="inline-flex p-3 bg-emerald-600 text-white rounded-xl shadow-lg">
+                <i data-lucide="key-round" class="w-8 h-8"></i>
+            </div>
+
+            <div>
+                <h2 class="text-xl font-bold text-slate-900 dark:text-white">Enter Master Key</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                    Your Master Key derives the AES-256 key to decrypt your vault in-browser.<br>
+                    <span class="text-amber-600 dark:text-amber-400 font-semibold">It never leaves your device.</span>
+                </p>
+            </div>
+
+            <form id="masterKeyForm" class="space-y-4 text-left">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Master Vault Key</label>
+                    <input type="password" id="masterKeyInput" required autocomplete="off" placeholder="Enter your Master Key..."
+                        class="w-full px-3.5 py-2.5 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white mono-font focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+                <button type="submit" id="unlockBtn" class="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-lg shadow-md transition-all flex items-center justify-center space-x-2">
+                    <i data-lucide="unlock" class="w-4 h-4"></i>
+                    <span>Unlock Vault</span>
+                </button>
+            </form>
+
+            <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs">
+                <span id="userBadgeEmail" class="text-slate-500 truncate max-w-[220px]"></span>
+                <button type="button" data-action="signout" class="text-red-500 hover:underline font-semibold cursor-pointer">Sign Out</button>
+            </div>
+
+            <div id="unlockMessage" class="text-xs text-center font-medium text-red-500 min-h-[1rem]"></div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         VIEW 3 — MAIN DASHBOARD
+         ═══════════════════════════════════════════════════ -->
+    <div id="dashboardView" class="hidden p-3 md:p-6 space-y-4 max-w-7xl mx-auto">
+
+        <!-- Dashboard Header -->
+        <header class="bg-white dark:bg-slate-900 rounded-xl p-4 shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div class="flex items-center space-x-3">
+                <div class="p-2.5 bg-blue-600 text-white rounded-lg shadow-md">
+                    <i data-lucide="book-key" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center space-x-2">
+                        <span>Sigma PassBook</span>
+                        <span class="text-[10px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-800 font-semibold">AES-256 E2EE</span>
+                    </h1>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center space-x-2 flex-wrap">
+                        <span id="activeUserEmail"></span>
+                        <span>•</span>
+                        <span id="syncStatusBadge" class="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center space-x-1">
+                            <i data-lucide="cloud-check" class="w-3.5 h-3.5"></i>
+                            <span>Cloud Synced</span>
+                        </span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="flex items-center space-x-2 w-full md:w-auto justify-end flex-wrap gap-2">
+                <button type="button" data-action="sync" title="Sync to cloud" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg shadow-sm transition-all flex items-center space-x-1.5 text-xs cursor-pointer">
+                    <i data-lucide="cloud-upload" class="w-4 h-4"></i>
+                    <span>Sync</span>
+                </button>
+                <button type="button" data-action="add-primary" class="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm transition-all flex items-center space-x-1.5 text-xs cursor-pointer">
+                    <i data-lucide="plus" class="w-4 h-4"></i>
+                    <span>Add Account</span>
+                </button>
+                <button type="button" data-action="export" title="Export Backup" class="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer">
+                    <i data-lucide="download" class="w-4 h-4"></i>
+                </button>
+                <button type="button" data-action="dark-mode" class="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer">
+                    <i data-lucide="moon" id="themeIcon" class="w-4 h-4"></i>
+                </button>
+                <button type="button" data-action="lock" title="Lock Vault" class="p-2 text-amber-600 hover:text-amber-700 dark:text-amber-400 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer">
+                    <i data-lucide="lock" class="w-4 h-4"></i>
+                </button>
+                <button type="button" data-action="signout" title="Sign Out" class="p-2 text-red-500 hover:text-red-700 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer">
+                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Search & Expand Controls -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+            <div class="relative w-full sm:w-80">
+                <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input type="text" id="searchInput" oninput="UI.handleSearch()" placeholder="Search accounts, emails, services..."
+                    class="w-full pl-9 pr-4 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+            </div>
+            <div class="flex items-center space-x-2 text-xs w-full sm:w-auto justify-end">
+                <button type="button" data-action="expand-all" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium rounded-md transition-colors cursor-pointer">Expand All</button>
+                <button type="button" data-action="collapse-all" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium rounded-md transition-colors cursor-pointer">Collapse All</button>
+            </div>
+        </div>
+
+        <!-- Accounts Spreadsheet -->
+        <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-300 dark:border-slate-800 shadow-md overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse sheet-table">
+                    <thead>
+                        <tr class="bg-slate-800 text-slate-100 text-xs uppercase tracking-wider font-semibold border-b-2 border-slate-900">
+                            <th class="py-3 px-3 w-12 text-center">#</th>
+                            <th class="py-3 px-4 min-w-[300px]">Accounts & Services</th>
+                            <th class="py-3 px-4 min-w-[180px]">Details</th>
+                            <th class="py-3 px-4 min-w-[200px]">Password</th>
+                            <th class="py-3 px-3 w-28 text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="spreadsheetBody" class="divide-y divide-slate-200 dark:divide-slate-800 text-sm">
+                        <!-- Rows injected by render.js -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         MODAL — PRIMARY ACCOUNT
+         ═══════════════════════════════════════════════════ -->
+    <div id="primaryModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-md overflow-hidden">
+            <div class="p-4 bg-slate-800 text-white flex items-center justify-between">
+                <h3 id="primaryModalTitle" class="font-bold text-base flex items-center space-x-2">
+                    <i data-lucide="mail" class="w-5 h-5 text-blue-400"></i>
+                    <span>Add Account</span>
+                </h3>
+                <button type="button" onclick="Modals.closePrimary()" class="text-slate-400 hover:text-white cursor-pointer">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <form id="primaryForm" class="p-5 space-y-4">
+                <input type="hidden" id="primaryId">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Email / Service Identifier</label>
+                    <input type="email" id="primaryEmail" required placeholder="example@gmail.com"
+                        class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Full Name</label>
+                        <input type="text" id="primaryName" required placeholder="Account Holder"
+                            class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Gender</label>
+                        <select id="primaryGender" class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                            <option value="">Not Specified</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Date of Birth (DD/MM/YYYY)</label>
+                    <input type="text" id="primaryDob" placeholder="DD/MM/YYYY (Optional)"
+                        class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Account Password</label>
+                    <input type="text" id="primaryPassword" required placeholder="••••••••"
+                        class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white mono-font focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div class="pt-3 flex items-center justify-end space-x-2 border-t border-slate-200 dark:border-slate-800">
+                    <button type="button" onclick="Modals.closePrimary()" class="px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">Cancel</button>
+                    <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow">Save Account</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         MODAL — SUB ACCOUNT / LINKED SERVICE
+         ═══════════════════════════════════════════════════ -->
+    <div id="subModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-800 w-full max-w-md overflow-hidden">
+            <div class="p-4 bg-emerald-700 text-white flex items-center justify-between">
+                <h3 id="subModalTitle" class="font-bold text-base flex items-center space-x-2">
+                    <i data-lucide="layers" class="w-5 h-5 text-emerald-300"></i>
+                    <span>Add Linked Service</span>
+                </h3>
+                <button type="button" onclick="Modals.closeSub()" class="text-slate-300 hover:text-white cursor-pointer">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <form id="subForm" class="p-5 space-y-4">
+                <input type="hidden" id="subParentId">
+                <input type="hidden" id="subId">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">App / Service / Wi-Fi Name</label>
+                    <input type="text" id="subApp" required placeholder="GitHub, Netflix, Home Wi-Fi..."
+                        class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Username / Identifier</label>
+                    <input type="text" id="subUsername" required placeholder="user_handle or email"
+                        class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1">Password / Security Key</label>
+                    <input type="text" id="subPassword" required placeholder="Secret Key"
+                        class="w-full px-3 py-2 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white mono-font focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+                <div class="pt-3 flex items-center justify-end space-x-2 border-t border-slate-200 dark:border-slate-800">
+                    <button type="button" onclick="Modals.closeSub()" class="px-4 py-2 text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg">Cancel</button>
+                    <button type="submit" class="px-4 py-2 text-sm font-semibold text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg shadow">Save Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white px-4 py-3 rounded-lg shadow-xl text-sm font-medium border border-slate-700 transform translate-y-20 opacity-0 transition-all duration-300 flex items-center space-x-2 z-50 pointer-events-none">
+        <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+        <span id="toastMsg">Action completed!</span>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════
+         JavaScript Modules — loaded in correct dependency order
+         ═══════════════════════════════════════════════════════════════ -->
+    <script src="config.js"></script>       <!-- 1. Supabase credentials -->
+    <script src="js/state.js"></script>     <!-- 2. Shared app state -->
+    <script src="js/crypto.js"></script>    <!-- 3. AES-256-GCM encryption -->
+    <script src="js/auth.js"></script>      <!-- 4. Supabase auth -->
+    <script src="js/vault.js"></script>     <!-- 5. Vault sync + lock/unlock -->
+    <script src="js/render.js"></script>    <!-- 6. Spreadsheet table renderer -->
+    <script src="js/modals.js"></script>    <!-- 7. Modal open/close/submit -->
+    <script src="js/ui.js"></script>        <!-- 8. UI utilities (toast, dark mode, etc.) -->
+    <script src="js/app.js"></script>       <!-- 9. Bootstrap + event wiring -->
+</body>
+</html>
