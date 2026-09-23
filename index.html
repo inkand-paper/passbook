@@ -395,6 +395,11 @@
          JavaScript Modules — loaded in correct dependency order
          ═══════════════════════════════════════════════════════════════ -->
     <script src="config.js"></script>       <!-- 1. Supabase credentials -->
+    <script>
+        if (typeof window.PASSBOOK_CONFIG === 'undefined') {
+            console.warn('config.js missing. Ensure environment or fallback is configured.');
+        }
+    </script>
     <script src="js/state.js"></script>     <!-- 2. Shared app state -->
     <script src="js/crypto.js"></script>    <!-- 3. AES-256-GCM encryption -->
     <script src="js/auth.js"></script>      <!-- 4. Supabase auth -->
