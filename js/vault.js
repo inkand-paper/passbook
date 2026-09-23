@@ -57,12 +57,16 @@ const Vault = (() => {
                 throw new Error('Incorrect Master Key — vault decryption failed.');
             }
         } else {
-            // First time: initialise a fresh vault
+            // First time: initialise a fresh vault.
+            // If a backup JSON was just imported (Reset Vault flow), keep it —
+            // don't stomp it with the blank default.
             const salt = Crypto.generateSalt();
             const cryptoKey = await Crypto.deriveKey(masterPassword, salt);
             AppState.masterSalt = salt;
             AppState.masterCryptoKey = cryptoKey;
-            AppState.passbookData = defaultVaultData();
+            if (!AppState.passbookData || AppState.passbookData.length === 0) {
+                AppState.passbookData = defaultVaultData();
+            }
             await save();
         }
     }
@@ -147,20 +151,33 @@ const Vault = (() => {
 
     /**
      * Check if a vault record exists for the current user in Supabase.
+     * Used only to decide whether the unlock screen should show the
+     * "confirm key" setup fields — it never gates whether unlock() itself
+     * succeeds, since unlock() re-checks this directly.
+     *
+     * On query failure we deliberately return true (assume a vault exists)
+     * rather than false. Returning false on error would send an existing
+     * user into "setup mode" and force them to type their key twice for
+     * no reason; returning true in error is the safe default because a
+     * genuinely new user who gets a single-field prompt by mistake can
+     * still create their vault fine — unlock() creates one automatically
+     * when no rows are found.
      * @returns {Promise<boolean>}
      */
     async function hasVault() {
         if (!AppState.currentUser) return false;
         try {
             const db = AppState.supabase;
-            const { data: rows } = await db
+            const { data: rows, error } = await db
                 .from(TABLE)
                 .select('id')
                 .eq('user_id', AppState.currentUser.id)
                 .limit(1);
+            if (error) throw error;
             return !!(rows && rows.length > 0);
-        } catch (_) {
-            return false;
+        } catch (err) {
+            console.warn('[Vault.hasVault] Could not verify vault existence, defaulting to unlock mode:', err);
+            return true;
         }
     }
 

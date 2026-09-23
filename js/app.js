@@ -29,8 +29,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ─── Auth Form ──────────────────────────────────────────────────────
     document.getElementById('authForm').addEventListener('submit', async (e) => {
         e.preventDefault();
+
+        const authSubmitBtn = document.getElementById('authSubmitBtn');
+        // Guard against double-clicks firing signIn/signUp twice while the
+        // first request is still in flight.
+        if (authSubmitBtn.disabled) return;
+
         const email    = document.getElementById('authEmail').value.trim();
         const password = document.getElementById('authPassword').value;
+        const originalLabel = document.getElementById('authSubmitText')?.innerText;
+
+        authSubmitBtn.disabled = true;
+        authSubmitBtn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>';
+        if (window.lucide) lucide.createIcons();
 
         try {
             if (AppState.authMode === 'signin') {
@@ -52,6 +63,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         } catch (err) {
             UI.setAuthMessage(err.message || 'Authentication failed.', 'error');
+        } finally {
+            authSubmitBtn.disabled = false;
+            authSubmitBtn.innerHTML = `<span id="authSubmitText">${originalLabel || 'Sign In to Vault'}</span>`;
         }
     });
 
