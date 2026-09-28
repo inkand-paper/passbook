@@ -172,10 +172,8 @@
                     </h1>
                     <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 flex items-center space-x-1.5 flex-wrap">
                         <span id="activeUserEmail"></span>
-                        <span>•</span>
-                        <span id="syncStatusBadge" class="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center space-x-1">
+                        <span id="syncStatusBadge" class="text-emerald-600 dark:text-emerald-400 flex items-center" title="Cloud Synced">
                             <i data-lucide="cloud-check" class="w-3.5 h-3.5"></i>
-                            <span>Cloud Synced</span>
                         </span>
                     </p>
                 </div>
@@ -220,15 +218,15 @@
 
         <!-- Accounts Spreadsheet -->
         <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-300 dark:border-slate-800 shadow-md overflow-hidden">
-            <div class="overflow-x-auto -mx-1 sm:mx-0">
+            <div class="w-full">
                 <table class="w-full text-left border-collapse sheet-table">
                     <thead>
                         <tr class="bg-slate-800 text-slate-100 text-xs uppercase tracking-wider font-semibold border-b-2 border-slate-900">
-                            <th class="py-2.5 px-2 sm:px-3 w-10 text-center">#</th>
-                            <th class="py-2.5 px-3 sm:px-4 min-w-[200px] sm:min-w-[260px]">Accounts & Services</th>
-                            <th class="py-2.5 px-3 sm:px-4 min-w-[140px] sm:min-w-[170px]">Details</th>
-                            <th class="py-2.5 px-3 sm:px-4 min-w-[160px] sm:min-w-[200px]">Password</th>
-                            <th class="py-2.5 px-2 sm:px-3 w-24 sm:w-28 text-center">Actions</th>
+                            <th class="py-2.5 px-1.5 sm:px-3 w-8 sm:w-12 text-center">#</th>
+                            <th class="py-2.5 px-2 sm:px-4">Accounts & Services</th>
+                            <th class="py-2.5 px-2 sm:px-4 hidden sm:table-cell">Details</th>
+                            <th class="py-2.5 px-2 sm:px-4">Password</th>
+                            <th class="py-2.5 px-1.5 sm:px-3 w-20 sm:w-28 text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="spreadsheetBody" class="divide-y divide-slate-200 dark:divide-slate-800 text-sm">

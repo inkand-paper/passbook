@@ -57,27 +57,29 @@ const Render = (() => {
         }).join('');
 
         return `
-            <div class="p-3 pl-8 pr-4">
+            <div class="p-2 sm:p-3 pl-2 sm:pl-8 pr-2 sm:pr-4">
                 <div class="bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-800 shadow-inner overflow-hidden">
-                    <div class="px-3 py-2 bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-slate-600 dark:text-slate-300">
-                        <span>${isAdditional ? 'Extra Passwords & Keys' : `Linked accounts for ${escapeHtml(item.email)}`}</span>
-                        <button type="button" onclick="Modals.openAddSub('${item.id}')" class="text-xs text-emerald-600 hover:underline flex items-center space-x-1 cursor-pointer">
+                    <div class="px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-slate-600 dark:text-slate-300">
+                        <span class="truncate max-w-[200px] sm:max-w-none">${isAdditional ? 'Extra Passwords & Keys' : `Linked accounts for ${escapeHtml(item.email)}`}</span>
+                        <button type="button" onclick="Modals.openAddSub('${item.id}')" class="text-xs text-emerald-600 hover:underline flex items-center space-x-1 cursor-pointer shrink-0">
                             <i data-lucide="plus" class="w-3 h-3"></i><span>Add Item</span>
                         </button>
                     </div>
-                    <table class="w-full text-xs text-left border-collapse">
-                        <thead class="bg-slate-50 dark:bg-slate-950 text-slate-500 border-b border-slate-200 dark:border-slate-800">
-                            <tr>
-                                <th class="py-2 px-3">${isAdditional ? 'Device / Service Name' : 'Application / Website'}</th>
-                                <th class="py-2 px-3">${isAdditional ? 'Username / SSID' : 'Username / Email'}</th>
-                                <th class="py-2 px-3">Password / Key</th>
-                                <th class="py-2 px-3 text-center">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                            ${rows}
-                        </tbody>
-                    </table>
+                    <div class="w-full overflow-x-auto">
+                        <table class="w-full text-xs text-left border-collapse">
+                            <thead class="bg-slate-50 dark:bg-slate-950 text-slate-500 border-b border-slate-200 dark:border-slate-800">
+                                <tr>
+                                    <th class="py-1.5 px-2">${isAdditional ? 'Device / Service' : 'App / Website'}</th>
+                                    <th class="py-1.5 px-2">${isAdditional ? 'Username / SSID' : 'User / Email'}</th>
+                                    <th class="py-1.5 px-2">Password</th>
+                                    <th class="py-1.5 px-1.5 text-center w-16 sm:w-20">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                                ${rows}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         `;
@@ -97,26 +99,29 @@ const Render = (() => {
         }`;
 
         tr.innerHTML = `
-            <td class="py-3 px-3 text-center font-bold text-slate-400 text-xs">
+            <td class="py-2.5 px-1.5 sm:px-3 text-center font-bold text-slate-400 text-xs">
                 ${isAdditional
                     ? '<i data-lucide="shield-check" class="w-4 h-4 text-amber-500 mx-auto"></i>'
                     : rowIndex}
             </td>
 
-            <td class="py-3 px-4 cursor-pointer select-none" onclick="UI.toggleExpand('${item.id}')">
-                <div class="flex items-center justify-between space-x-2">
-                    <span class="font-bold ${isAdditional ? 'text-amber-700 dark:text-amber-400' : 'text-blue-700 dark:text-blue-400'} flex items-center space-x-2 truncate">
-                        <i data-lucide="${isAdditional ? 'key-round' : 'mail'}" class="w-4 h-4 ${isAdditional ? 'text-amber-500' : 'text-blue-500'} shrink-0"></i>
-                        <span class="truncate">${escapeHtml(item.email)}</span>
-                    </span>
-                    <div class="flex items-center space-x-1 ${isAdditional ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300' : 'bg-blue-100 dark:bg-slate-700 text-blue-800 dark:text-blue-300'} px-2 py-0.5 rounded text-xs font-semibold shrink-0">
-                        <span>${item.subAccounts.length} items</span>
-                        <i data-lucide="chevron-down" class="w-3.5 h-3.5 arrow-rotate"></i>
+            <td class="py-2.5 px-2 sm:px-4 cursor-pointer select-none" onclick="UI.toggleExpand('${item.id}')">
+                <div class="flex items-center justify-between space-x-1.5 sm:space-x-2">
+                    <div class="min-w-0 max-w-[130px] sm:max-w-none">
+                        <span class="font-bold ${isAdditional ? 'text-amber-700 dark:text-amber-400' : 'text-blue-700 dark:text-blue-400'} flex items-center space-x-1.5 truncate text-xs sm:text-sm">
+                            <i data-lucide="${isAdditional ? 'key-round' : 'mail'}" class="w-3.5 h-3.5 sm:w-4 sm:h-4 ${isAdditional ? 'text-amber-500' : 'text-blue-500'} shrink-0"></i>
+                            <span class="truncate">${escapeHtml(item.email)}</span>
+                        </span>
+                        ${item.name ? `<div class="sm:hidden text-[10px] text-slate-500 font-normal truncate mt-0.5">${escapeHtml(item.name)}</div>` : ''}
+                    </div>
+                    <div class="flex items-center space-x-1 ${isAdditional ? 'bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300' : 'bg-blue-100 dark:bg-slate-700 text-blue-800 dark:text-blue-300'} px-1.5 py-0.5 rounded text-[10px] sm:text-xs font-semibold shrink-0">
+                        <span>${item.subAccounts.length}</span>
+                        <i data-lucide="chevron-down" class="w-3 h-3 sm:w-3.5 sm:h-3.5 arrow-rotate"></i>
                     </div>
                 </div>
             </td>
 
-            <td class="py-3 px-4">
+            <td class="py-2.5 px-2 sm:px-4 hidden sm:table-cell">
                 <div class="space-y-0.5 text-xs">
                     <div class="font-semibold text-slate-900 dark:text-slate-100">${escapeHtml(item.name)}</div>
                     <div class="text-slate-500 dark:text-slate-400 text-[11px]">
@@ -129,38 +134,38 @@ const Render = (() => {
                 </div>
             </td>
 
-            <td class="py-3 px-4">
+            <td class="py-2.5 px-2 sm:px-4">
                 ${isAdditional
-                    ? `<span class="text-xs text-slate-400 italic">Expand row for keys</span>`
-                    : `<div class="flex items-center space-x-2">
-                        <span class="mono-font text-xs font-medium px-2 py-1 rounded bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 min-w-[120px] inline-block">
-                            ${isPassVisible ? escapeHtml(item.password) : '••••••••••••'}
+                    ? `<span class="text-[11px] sm:text-xs text-slate-400 italic">Expand for keys</span>`
+                    : `<div class="flex items-center space-x-1 sm:space-x-1.5">
+                        <span class="mono-font text-xs font-medium px-1.5 py-0.5 sm:px-2 sm:py-1 rounded bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 max-w-[80px] sm:max-w-[140px] truncate inline-block">
+                            ${isPassVisible ? escapeHtml(item.password) : '••••••••'}
                         </span>
-                        <button type="button" onclick="UI.togglePassword('${item.id}')" class="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer">
-                            <i data-lucide="${isPassVisible ? 'eye-off' : 'eye'}" class="w-4 h-4"></i>
+                        <button type="button" onclick="UI.togglePassword('${item.id}')" class="p-0.5 sm:p-1 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer">
+                            <i data-lucide="${isPassVisible ? 'eye-off' : 'eye'}" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
                         </button>
-                        <button type="button" onclick="UI.copyToClipboard('${escapeHtml(item.password)}')" class="p-1 text-slate-400 hover:text-emerald-600 cursor-pointer">
-                            <i data-lucide="copy" class="w-4 h-4"></i>
+                        <button type="button" onclick="UI.copyToClipboard('${escapeHtml(item.password)}')" class="p-0.5 sm:p-1 text-slate-400 hover:text-emerald-600 cursor-pointer">
+                            <i data-lucide="copy" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
                         </button>
                     </div>`
                 }
             </td>
 
-            <td class="py-3 px-3 text-center">
-                <div class="flex items-center justify-center space-x-1">
-                    <button type="button" onclick="Modals.openAddSub('${item.id}')" title="Add linked item" class="p-1.5 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 rounded-md cursor-pointer">
-                        <i data-lucide="plus-circle" class="w-4 h-4"></i>
+            <td class="py-2.5 px-1.5 sm:px-3 text-center">
+                <div class="flex items-center justify-center space-x-0.5 sm:space-x-1">
+                    <button type="button" onclick="Modals.openAddSub('${item.id}')" title="Add linked item" class="p-1 sm:p-1.5 text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 rounded-md cursor-pointer">
+                        <i data-lucide="plus-circle" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
                     </button>
                     ${!isAdditional ? `
-                        <button type="button" onclick="Modals.openEditPrimary('${item.id}')" title="Edit account" class="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md cursor-pointer">
-                            <i data-lucide="pencil" class="w-4 h-4"></i>
+                        <button type="button" onclick="Modals.openEditPrimary('${item.id}')" title="Edit account" class="p-1 sm:p-1.5 text-slate-500 hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-md cursor-pointer">
+                            <i data-lucide="pencil" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
                         </button>
-                        <button type="button" onclick="Modals.deletePrimary('${item.id}')" title="Delete account" class="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-md cursor-pointer">
-                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        <button type="button" onclick="Modals.deletePrimary('${item.id}')" title="Delete account" class="p-1 sm:p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50 rounded-md cursor-pointer">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
                         </button>
                     ` : `
-                        <span class="p-1.5 text-slate-300 dark:text-slate-700" title="System row — cannot delete">
-                            <i data-lucide="lock" class="w-4 h-4"></i>
+                        <span class="p-1 sm:p-1.5 text-slate-300 dark:text-slate-700" title="System row — cannot delete">
+                            <i data-lucide="lock" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
                         </span>
                     `}
                 </div>
