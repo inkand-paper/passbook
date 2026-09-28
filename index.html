@@ -91,7 +91,7 @@
                 </p>
             </div>
 
-            <form id="masterKeyForm" class="space-y-4 text-left">
+            <form id="masterKeyForm" class="space-y-4 text-left" autocomplete="off">
                 <div>
                     <div class="flex items-center justify-between mb-1">
                         <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400">Master Vault Key</label>
@@ -102,7 +102,7 @@
                     </div>
 
                     <div class="relative">
-                        <input type="password" id="masterKeyInput" required autocomplete="off" placeholder="Enter Master Key..."
+                        <input type="password" id="masterKeyInput" name="master_key_vault_no_save" autocomplete="new-password" data-lpignore="true" data-1p-ignore="true" data-form-type="other" required placeholder="Enter Master Key..."
                             class="w-full px-3.5 py-2.5 pr-10 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white mono-font focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                         <button type="button" onclick="UI.toggleFieldVisibility('masterKeyInput', 'masterKeyIcon')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer p-1">
                             <i data-lucide="eye" id="masterKeyIcon" class="w-4 h-4"></i>
@@ -125,7 +125,7 @@
                         <div>
                             <label class="block text-xs font-bold uppercase text-slate-600 dark:text-slate-400 mb-1">Confirm Master Key</label>
                             <div class="relative">
-                                <input type="password" id="masterKeyConfirmInput" autocomplete="off" placeholder="Re-enter Master Key to confirm..."
+                                <input type="password" id="masterKeyConfirmInput" name="master_key_confirm_no_save" autocomplete="new-password" data-lpignore="true" data-1p-ignore="true" data-form-type="other" placeholder="Re-enter Master Key to confirm..."
                                     class="w-full px-3.5 py-2.5 pr-10 text-sm rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white mono-font focus:ring-2 focus:ring-emerald-500 focus:outline-none">
                                 <button type="button" onclick="UI.toggleFieldVisibility('masterKeyConfirmInput', 'masterKeyConfirmIcon')" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer p-1">
                                     <i data-lucide="eye" id="masterKeyConfirmIcon" class="w-4 h-4"></i>
@@ -158,20 +158,19 @@
     <!-- ═══════════════════════════════════════════════════
          VIEW 3 — MAIN DASHBOARD
          ═══════════════════════════════════════════════════ -->
-    <div id="dashboardView" class="hidden p-3 md:p-6 space-y-4 max-w-7xl mx-auto">
+    <div id="dashboardView" class="hidden p-2 sm:p-4 md:p-6 space-y-3 sm:space-y-4 max-w-7xl mx-auto">
 
         <!-- Dashboard Header -->
-        <header class="bg-white dark:bg-slate-900 rounded-xl p-4 shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <header class="bg-white dark:bg-slate-900 rounded-xl p-3 sm:p-4 shadow-sm border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div class="flex items-center space-x-3">
-                <div class="p-2.5 bg-blue-600 text-white rounded-lg shadow-md">
-                    <i data-lucide="book-key" class="w-6 h-6"></i>
+                <div class="p-2 sm:p-2.5 bg-blue-600 text-white rounded-lg shadow-md shrink-0">
+                    <i data-lucide="book-key" class="w-5 h-5 sm:w-6 sm:h-6"></i>
                 </div>
                 <div>
-                    <h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center space-x-2">
+                    <h1 class="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-white">
                         <span>Sigma PassBook</span>
-                        <span class="text-[10px] bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-800 font-semibold">AES-256 E2EE</span>
                     </h1>
-                    <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center space-x-2 flex-wrap">
+                    <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 flex items-center space-x-1.5 flex-wrap">
                         <span id="activeUserEmail"></span>
                         <span>•</span>
                         <span id="syncStatusBadge" class="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center space-x-1">
@@ -182,54 +181,54 @@
                 </div>
             </div>
 
-            <div class="flex items-center space-x-2 w-full md:w-auto justify-end flex-wrap gap-2">
-                <button type="button" data-action="sync" title="Sync to cloud" class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg shadow-sm transition-all flex items-center space-x-1.5 text-xs cursor-pointer">
-                    <i data-lucide="cloud-upload" class="w-4 h-4"></i>
+            <div class="flex items-center space-x-1.5 sm:space-x-2 w-full sm:w-auto justify-end flex-wrap gap-1.5">
+                <button type="button" data-action="sync" title="Sync to cloud" class="px-2.5 sm:px-3.5 py-1.5 sm:py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg shadow-sm transition-all flex items-center space-x-1 sm:space-x-1.5 text-xs cursor-pointer">
+                    <i data-lucide="cloud-upload" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
                     <span>Sync</span>
                 </button>
-                <button type="button" data-action="add-primary" class="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm transition-all flex items-center space-x-1.5 text-xs cursor-pointer">
-                    <i data-lucide="plus" class="w-4 h-4"></i>
+                <button type="button" data-action="add-primary" class="px-2.5 sm:px-3.5 py-1.5 sm:py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm transition-all flex items-center space-x-1 sm:space-x-1.5 text-xs cursor-pointer">
+                    <i data-lucide="plus" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
                     <span>Add Account</span>
                 </button>
-                <button type="button" data-action="export" title="Export Backup" class="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer">
-                    <i data-lucide="download" class="w-4 h-4"></i>
+                <button type="button" data-action="export" title="Export Backup" class="p-1.5 sm:p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer">
+                    <i data-lucide="download" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
                 </button>
-                <button type="button" data-action="dark-mode" class="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer">
-                    <i data-lucide="moon" id="themeIcon" class="w-4 h-4"></i>
+                <button type="button" data-action="dark-mode" class="p-1.5 sm:p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-white rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer">
+                    <i data-lucide="moon" id="themeIcon" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
                 </button>
-                <button type="button" data-action="lock" title="Lock Vault" class="p-2 text-amber-600 hover:text-amber-700 dark:text-amber-400 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer">
-                    <i data-lucide="lock" class="w-4 h-4"></i>
+                <button type="button" data-action="lock" title="Lock Vault" class="p-1.5 sm:p-2 text-amber-600 hover:text-amber-700 dark:text-amber-400 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer">
+                    <i data-lucide="lock" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
                 </button>
-                <button type="button" data-action="signout" title="Sign Out" class="p-2 text-red-500 hover:text-red-700 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer">
-                    <i data-lucide="log-out" class="w-4 h-4"></i>
+                <button type="button" data-action="signout" title="Sign Out" class="p-1.5 sm:p-2 text-red-500 hover:text-red-700 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 cursor-pointer">
+                    <i data-lucide="log-out" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
                 </button>
             </div>
         </header>
 
         <!-- Search & Expand Controls -->
-        <div class="flex flex-col sm:flex-row items-center justify-between gap-3 bg-white dark:bg-slate-900 p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-2.5 bg-white dark:bg-slate-900 p-2.5 sm:p-3 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm">
             <div class="relative w-full sm:w-80">
                 <i data-lucide="search" class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
                 <input type="text" id="searchInput" oninput="UI.handleSearch()" placeholder="Search accounts, emails, services..."
                     class="w-full pl-9 pr-4 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
             </div>
             <div class="flex items-center space-x-2 text-xs w-full sm:w-auto justify-end">
-                <button type="button" data-action="expand-all" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium rounded-md transition-colors cursor-pointer">Expand All</button>
-                <button type="button" data-action="collapse-all" class="px-3 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium rounded-md transition-colors cursor-pointer">Collapse All</button>
+                <button type="button" data-action="expand-all" class="px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium rounded-md transition-colors cursor-pointer text-xs">Expand All</button>
+                <button type="button" data-action="collapse-all" class="px-2.5 py-1.5 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-medium rounded-md transition-colors cursor-pointer text-xs">Collapse All</button>
             </div>
         </div>
 
         <!-- Accounts Spreadsheet -->
         <div class="bg-white dark:bg-slate-900 rounded-xl border border-slate-300 dark:border-slate-800 shadow-md overflow-hidden">
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto -mx-1 sm:mx-0">
                 <table class="w-full text-left border-collapse sheet-table">
                     <thead>
                         <tr class="bg-slate-800 text-slate-100 text-xs uppercase tracking-wider font-semibold border-b-2 border-slate-900">
-                            <th class="py-3 px-3 w-12 text-center">#</th>
-                            <th class="py-3 px-4 min-w-[300px]">Accounts & Services</th>
-                            <th class="py-3 px-4 min-w-[180px]">Details</th>
-                            <th class="py-3 px-4 min-w-[200px]">Password</th>
-                            <th class="py-3 px-3 w-28 text-center">Actions</th>
+                            <th class="py-2.5 px-2 sm:px-3 w-10 text-center">#</th>
+                            <th class="py-2.5 px-3 sm:px-4 min-w-[200px] sm:min-w-[260px]">Accounts & Services</th>
+                            <th class="py-2.5 px-3 sm:px-4 min-w-[140px] sm:min-w-[170px]">Details</th>
+                            <th class="py-2.5 px-3 sm:px-4 min-w-[160px] sm:min-w-[200px]">Password</th>
+                            <th class="py-2.5 px-2 sm:px-3 w-24 sm:w-28 text-center">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="spreadsheetBody" class="divide-y divide-slate-200 dark:divide-slate-800 text-sm">

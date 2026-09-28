@@ -136,11 +136,19 @@ const Crypto = (() => {
             "granite", "harbor", "horizon", "island", "jaguar", "jungle", "knight", "legend",
             "matrix", "monarch", "nebula", "neutron", "ocean", "orbit", "panther", "phoenix",
             "planet", "prism", "pyramid", "quantum", "radar", "shadow", "shield", "silver",
-            "solar", "spectrum", "sphere", "summit", "thunder", "titan", "vector", "vortex"
+            "solar", "spectrum", "sphere", "summit", "thunder", "titan", "vector", "vortex",
+            "alpine", "amber", "arctic", "astral", "aurora", "banyan", "blaze", "canyon",
+            "cavern", "celestial", "citadel", "comet", "crimson", "dynasty", "eclipse", "glacier"
         ];
-        const randomValues = new Uint32Array(12);
-        crypto.getRandomValues(randomValues);
-        return Array.from(randomValues).map(val => wordList[val % wordList.length]).join('-');
+        const selected = [];
+        const available = [...wordList];
+        while (selected.length < 12 && available.length > 0) {
+            const randomVal = new Uint32Array(1);
+            crypto.getRandomValues(randomVal);
+            const index = randomVal[0] % available.length;
+            selected.push(available.splice(index, 1)[0]);
+        }
+        return selected.join('-');
     }
 
     return { deriveKey, encrypt, decrypt, generateSalt, saltToBase64, saltFromBase64, calculateStrength, generatePassphrase };
